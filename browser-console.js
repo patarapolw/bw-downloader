@@ -12,11 +12,9 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 // Track which images have already been downloaded.  This prevents downloading the same image multiple times.
 const downloadedPages = [];
 
-const getPage = () => {
+const getPage = (canvas) => {
   // Get the page number from the canvas's parent element's ID.
-  return Number(
-    document.querySelector("#pageSliderCounter").textContent.split("/")[0]
-  );
+  return Number(canvas.parentElement.id.replace("wideScreen", "")) + 1;
 };
 
 // Download a single image from a canvas.
@@ -25,7 +23,7 @@ async function DownloadPage(canvas) {
     return;
   }
 
-  const page = getPage();
+  const page = getPage(canvas);
 
   await fetch("http://localhost:3000/", {
     method: "POST",
@@ -58,7 +56,7 @@ const existingPages = new Set(
 );
 
 // Loops through canvases until all expected images have downloaded.
-while (downloadedPages.length < pageCount) {
+while (downloadedPages.length < pageCount - existingPages.size) {
   // Grab all available canvases.
   const canvases = document.querySelectorAll("canvas.default");
 
@@ -74,7 +72,7 @@ while (downloadedPages.length < pageCount) {
     // Wait for the page number to render.
     await delay(100);
 
-    const p = getPage();
+    const p = getPage(canvas);
     console.log(`Loading page ${p} of ${pageCount} from "${volumeName}"...`);
 
     if (existingPages.has(p)) {
@@ -85,11 +83,5 @@ while (downloadedPages.length < pageCount) {
     await delay(delayTime);
     await DownloadPage(canvas);
     downloadedImageCount += 1;
-  }
-
-  // If no images were downloaded, then likely all images are downloaded, and the loop can be exited.  This situation shouldn't occur, but is here just in case.
-  if (0 == downloadedImageCount) {
-    console.log("Downloading complete!");
-    break;
   }
 }
