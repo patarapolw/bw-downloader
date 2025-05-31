@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "BookWalker Auto Capture",
+  "version": "1.0",
+  "permissions": ["tabs", "activeTab", "scripting", "downloads"],
+  "host_permissions": ["https://viewer.bookwalker.jp/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://viewer.bookwalker.jp/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["jszip.min.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
