@@ -2,7 +2,7 @@
 const volumeName = document.title;
 
 // Delay time in miliseconds.  If you get blank images, increase this number and try again.  The higher the number, the slower the volume will take to fully download.
-const delayTime = 2000;
+const delayTime = 1000;
 
 // Do not modify code beyond this line unless you know what you are doing.
 
@@ -12,14 +12,20 @@ const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 // Track which images have already been downloaded.  This prevents downloading the same image multiple times.
 const downloadedPages = [];
 
+const getPage = () => {
+  // Get the page number from the canvas's parent element's ID.
+  return Number(
+    document.querySelector("#pageSliderCounter").textContent.split("/")[0]
+  );
+};
+
 // Download a single image from a canvas.
 async function DownloadPage(canvas) {
   if (downloadedPages.includes(canvas.parentElement.id)) {
     return;
   }
 
-  const page = Number(canvas.parentElement.id.replace("wideScreen", ""));
-  console.log(`Capturing page ${page} of ${pageCount} from "${volumeName}"...`);
+  const page = getPage();
 
   await fetch("http://localhost:3000/", {
     method: "POST",
@@ -45,6 +51,12 @@ const pageCount = Number(
   document.querySelector("#pageSliderCounter").textContent.split("/")[1]
 );
 
+const existingPages = new Set(
+  await fetch("http://localhost:3000/" + volumeName)
+    .then((response) => response.json())
+    .then((data) => data.pages)
+);
+
 // Loops through canvases until all expected images have downloaded.
 while (downloadedPages.length < pageCount) {
   // Grab all available canvases.
@@ -59,10 +71,19 @@ while (downloadedPages.length < pageCount) {
       continue;
     }
 
+    // Wait for the page number to render.
+    await delay(100);
+
+    const p = getPage();
+    console.log(`Loading page ${p} of ${pageCount} from "${volumeName}"...`);
+
+    if (existingPages.has(p)) {
+      continue;
+    }
+
     // Wait for image to load.
     await delay(delayTime);
-
-    DownloadPage(canvas);
+    await DownloadPage(canvas);
     downloadedImageCount += 1;
   }
 

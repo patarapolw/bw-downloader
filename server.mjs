@@ -12,12 +12,25 @@ await fastify.register(cors, {
   // put your options here
 });
 
-// Declare a route
-fastify.post("/", async function handler(request, reply) {
+fastify.get("/:title", async (request, reply) => {
+  const { title } = request.params;
+
+  try {
+    return {
+      pages: fs
+        .readdirSync(`out/${title}`)
+        .map((file) => Number(file.split("_of_")[0])),
+    };
+  } catch (err) {
+    return { pages: [] };
+  }
+});
+
+fastify.post("/", async (request, reply) => {
   const { title, page, total, data } = request.body;
 
   try {
-    fs.mkdirSync(`out/${title}`);
+    fs.mkdirSync(`out/${title}`, { recursive: true });
   } catch (err) {}
 
   const filePath = `out/${title}/${String(page).padStart(
