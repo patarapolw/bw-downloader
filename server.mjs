@@ -20,8 +20,8 @@ fastify.post("/", async function handler(request, reply) {
     fs.mkdirSync(`out/${title}`);
   } catch (err) {}
 
-  const filePath = `out/${title}/page_${page.padStart(
-    total.length,
+  const filePath = `out/${title}/${String(page).padStart(
+    String(total).length,
     "0"
   )}_of_${total}.png`;
 
