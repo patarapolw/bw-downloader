@@ -1,64 +1,68 @@
+const viewer = document.querySelector("#viewer");
+
+let lastDataURL = null;
+const captured = [];
+let isStarted = false;
+let isEnded = false;
+
 window.addEventListener("click", async (e) => {
-  if (true) {
-    if (window._bookwalkerCaptureRunning) return;
-    window._bookwalkerCaptureRunning = true;
-
-    createLoader();
-
-    let lastDataURL = null;
-    let count = 0;
-    const max = 3000;
-    const captured = [];
-
-    while (count < max) {
-      // Get the canvas element
-      const canvas = document.querySelector('canvas');
-      if (!canvas) {
-        alert('Canvas element not found!');
-        break;
-      }
-
-      // Convert canvas to PNG data URL
-      const dataUrl = canvas.toDataURL('image/png');
-
-      if (dataUrl === lastDataURL) break;
-      lastDataURL = dataUrl;
-      captured.push(dataUrl);
-
-      // Simulate click to turn page
-      const target = document.elementFromPoint(50, window.innerHeight / 2);
-      if (target) target.click();
-
-      await new Promise(res => setTimeout(res, 1000));
-      count++;
-    }
-
-    const title = document.title || 'bookwalker_pages';
-    chrome.runtime.sendMessage({ action: "downloadZip", images: captured, title });
-
-    removeLoader();
-    window._bookwalkerCaptureRunning = false;
+  if (isEnded) return;
+  if (!viewer.classList.contains("rightmost")) {
+    isStarted = true;
   }
-}, { once: true });
+
+  if (isStarted) {
+    const isNew = await capturePage();
+
+    if (viewer.classList.contains("leftmost")) return;
+    if (!isNew) return;
+
+    const title = document.title || "bookwalker_pages";
+    chrome.runtime.sendMessage({
+      action: "downloadZip",
+      images: captured,
+      title,
+    });
+    isEnded = true;
+  }
+});
+
+async function capturePage() {
+  createLoader();
+  console.log(`Capturing page ${captured.length + 1}...`);
+
+  const dataUrl = await chrome.runtime.sendMessage({ action: "capture" });
+  const isNew = lastDataURL !== dataUrl;
+
+  if (isNew) {
+    lastDataURL = dataUrl;
+    captured.push(dataUrl);
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 300)); // Wait for page transition
+  removeLoader();
+
+  return isNew;
+}
 
 function createLoader() {
-  const loader = document.createElement('div');
-  loader.id = 'capture-loader-overlay';
+  const loader = document.createElement("div");
+  loader.id = "capture-loader-overlay";
   Object.assign(loader.style, {
-    position: 'fixed',
-    top: '0',
-    left: '0',
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: 'white',
-    fontSize: '2rem',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: '9999999',
-    userSelect: 'none',
-    pointerEvents: 'all'
+    position: "fixed",
+    top: "0",
+    left: "0",
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    color: "white",
+    fontSize: "2rem",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: "9999999",
+    userSelect: "none",
+    pointerEvents: "all",
   });
   loader.innerHTML = `
     <div>
@@ -76,6 +80,6 @@ function createLoader() {
 }
 
 function removeLoader() {
-  const loader = document.getElementById('capture-loader-overlay');
+  const loader = document.getElementById("capture-loader-overlay");
   if (loader) loader.remove();
 }
