@@ -2,7 +2,7 @@
 const volumeName = document.title;
 
 // Delay time in miliseconds.  If you get blank images, increase this number and try again.  The higher the number, the slower the volume will take to fully download.
-const delayTime = 1000;
+const delayTime = 1500;
 
 // Do not modify code beyond this line unless you know what you are doing.
 
