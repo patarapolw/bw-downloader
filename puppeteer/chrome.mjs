@@ -19,6 +19,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   spawn(
     executablePath,
     [
+      /**
+       * User data directory for Puppeteer must be specified since Chrome 136.
+       * @see https://developer.chrome.com/blog/remote-debugging-port
+       */
       `--remote-debugging-port=${remoteDebuggingPort}`,
       `--user-data-dir=${userDataDir}`,
       "--disable-features=IsolateOrigins,site-per-process",

@@ -52,13 +52,7 @@ puppeteer
         console.log(`Saved page ${pageRange} of ${pageCount}`);
       }
 
-      // Last page for odd pageCount is pageCount
-      // while last page for even pageCount is pageCount - 1
-      if (pageCount % 2) {
-        if (page >= pageCount) break;
-      } else {
-        if (page >= pageCount - 1) break;
-      }
+      if (page >= pageCount) break;
 
       tab.mouse.click(100, 500); // Click to turn the page
 
