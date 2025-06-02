@@ -21,7 +21,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     [
       `--remote-debugging-port=${remoteDebuggingPort}`,
       `--user-data-dir=${userDataDir}`,
-      "--disable-web-security",
       "--disable-features=IsolateOrigins,site-per-process",
     ],
     {

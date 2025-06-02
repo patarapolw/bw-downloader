@@ -1,4 +1,8 @@
+import fs from "node:fs";
+import { URL } from "node:url";
+
 import puppeteer from "puppeteer-core";
+import sharp from "sharp";
 
 import { remoteDebuggingPort } from "./chrome.mjs";
 
@@ -9,31 +13,54 @@ puppeteer
   })
   .then(async (browser) => {
     const tabs = await browser.pages();
-    const tab = tabs[0]; // Use the last tab opened
+    const tab = tabs.find((t) => {
+      const { host } = new URL(t.url());
+      return host.endsWith(".bookwalker.jp") && host.startsWith("viewer");
+    });
 
-    const [page, pageCount] = (
-      await tab
+    const title = await tab.title();
+    try {
+      fs.mkdirSync(`out/${title}`, { recursive: true });
+    } catch (err) {}
+
+    const getPage = async () => {
+      const pageSliderCounterText = await tab
         .$("#pageSliderCounter")
-        .then((h) => h.evaluate((el) => el.textContent))
-    )
-      .split("/")
-      .map(Number);
+        .then((h) => h.evaluate((el) => el.textContent));
 
-    if (page !== 1) {
-      throw new Error(`Expected page 1, but found page ${page}.`);
-    }
+      return pageSliderCounterText.split("/").map(Number);
+    };
 
-    const waitForReader = (delay = 200) =>
-      new Promise((resolve) => setTimeout(resolve, delay));
+    const [page, pageCount] = await getPage();
 
-    await waitForReader();
+    let pageNumber = page;
 
-    let pageNumber = 1;
-    while (pageNumber < pageCount) {
+    while (pageNumber < pageCount - 2) {
+      const pageRange =
+        pageNumber === 1 ? "1" : `${pageNumber}-${pageNumber + 1}`;
+      const filename = `out/${title}/(${pageRange})_of_${pageCount}.png`;
+      if (!fs.existsSync(filename)) {
+        await sharp(await tab.screenshot())
+          .trim()
+          .toFile(filename);
+        console.log(`Saved page ${pageRange} of ${pageCount}`);
+      }
+
       tab.mouse.click(100, 500); // Click to turn the page
-      await tab.waitForNetworkIdle();
-      await waitForReader();
 
-      pageNumber += 2; // double page increase because of horizontal layout
+      const start = new Date();
+      await tab.waitForNetworkIdle();
+
+      const elapsed = new Date() - start;
+      const minWaitTime = 1000; // Minimum wait time in milliseconds
+      if (elapsed < minWaitTime) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, minWaitTime - elapsed)
+        );
+      }
+
+      const [newPage] = await getPage();
+      if (newPage === pageNumber) continue;
+      pageNumber = newPage;
     }
   });
