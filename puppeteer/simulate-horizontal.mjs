@@ -19,9 +19,12 @@ puppeteer
     });
 
     const title = await tab.title();
-    try {
-      fs.mkdirSync(`out/${title}`, { recursive: true });
-    } catch (err) {}
+    const folderName =
+      "out/" +
+      title.replace("【期間限定無料】", "").replace(/[\s/\\?<>:"|*]/g, ""); // Replace invalid characters for folder names
+    if (!fs.existsSync(folderName)) {
+      fs.mkdirSync(folderName, { recursive: true });
+    }
 
     const getPage = async () => {
       const pageSliderCounterText = await tab
@@ -41,7 +44,7 @@ puppeteer
         pageRange = `${page - 1}-${page}`;
       }
 
-      const filename = `out/${title}/(${pageRange})_of_${pageCount}.png`;
+      const filename = `${folderName}/(${pageRange})_of_${pageCount}.png`;
       if (!fs.existsSync(filename)) {
         await sharp(await tab.screenshot())
           .trim()
