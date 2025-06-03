@@ -46,7 +46,7 @@ try {
     const filename = `${folderName}/(${pageRange})_of_${pageCount}.png`;
     if (!fs.existsSync(filename)) {
       // Manually resize the viewport to minimize white space
-      await tab.screenshot({ filename, fullPage: true });
+      await tab.screenshot({ path: filename });
       // await sharp(await tab.screenshot())
       //   .trim()
       //   .toFile(filename);
