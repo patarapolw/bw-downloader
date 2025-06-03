@@ -19,5 +19,5 @@ export async function simulate(o) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  await runInPuppeteer(simulateHorizontal);
+  await runInPuppeteer(simulate);
 }
