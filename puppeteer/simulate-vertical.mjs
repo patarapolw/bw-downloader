@@ -1,46 +1,15 @@
 //@ts-check
 
-import fs from "fs";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
-import puppeteer from "puppeteer-core";
+import { getPageCount, runInPuppeteer } from "./common.mjs";
 
-import { remoteDebuggingPort } from "./chrome.mjs";
-
-const browser = await puppeteer.connect({
-  browserURL: `http://localhost:${remoteDebuggingPort}`,
-  defaultViewport: null, // Use the default viewport size
-});
-
-try {
-  const tabs = await browser.pages();
-  const tab = tabs.find((t) => {
-    const { host } = new URL(t.url());
-    return host.endsWith(".bookwalker.jp") && host.startsWith("viewer");
-  });
-
-  if (!tab) {
-    throw new Error("No suitable tab found for BookWalker viewer.");
-  }
-
-  const title = await tab.title();
-  const folderName =
-    "out/" +
-    title.replace("【期間限定無料】", "").replace(/[\s/\\?<>:"|*]/g, ""); // Replace invalid characters for folder names
-  if (!fs.existsSync(folderName)) {
-    fs.mkdirSync(folderName, { recursive: true });
-  }
-
-  const getPage = async () => {
-    const pageSliderCounterText = await tab
-      .$("#pageSliderCounter")
-      .then((h) => h && h.evaluate((el) => el.textContent));
-    if (!pageSliderCounterText) {
-      throw new Error("Page slider counter not found.");
-    }
-
-    return pageSliderCounterText.split("/").map(Number);
-  };
-  const totalPages = (await getPage())[1];
+/**
+ * @type {Parameters<typeof import('./common.mjs').runInPuppeteer>[0]}
+ */
+export async function simulateVertical({ tab, folderName }) {
+  const { total: totalPages } = await getPageCount(tab);
 
   const existingPages = fs
     .readdirSync(folderName)
@@ -97,6 +66,8 @@ try {
     await tab.mouse.wheel({ deltaY: 1000 }); // Scroll down to load more canvases
     await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for a short time to allow the page to load more canvases
   }
-} finally {
-  await browser.disconnect();
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  await runInPuppeteer(simulateVertical);
 }

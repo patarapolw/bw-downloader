@@ -1,9 +1,11 @@
+//@ts-check
+
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-export const remoteDebuggingPort = 9222;
+import { remoteDebuggingPort } from "./common.mjs";
 
 const userDataDir =
   process.env.PUPPETEER_USER_DATA_DIR || resolve("out/.puppeteer");

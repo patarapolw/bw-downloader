@@ -6,8 +6,7 @@
   "scripts": {
     "server": "node server.mjs",
     "pup:chrome": "node ./puppeteer/chrome.mjs",
-    "pup:horizontal": "node ./puppeteer/simulate-horizontal.mjs",
-    "pup:vertical": "node ./puppeteer/simulate-vertical.mjs",
+    "pup:simulate": "node ./puppeteer/simulate.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
