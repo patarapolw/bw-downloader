@@ -79,8 +79,15 @@ try {
           (c) => c.toDataURL("image/png").split(",")[1]
         );
 
-        const filename = `${folderName}/${canvasPage}_of_${totalPages}.png`;
+        const filename = `${folderName}/${String(canvasPage).padStart(
+          String(totalPages).length,
+          "0"
+        )}_of_${totalPages}.png`;
+
+        // Manually resize the viewport to minimize white space
         fs.writeFileSync(filename, Buffer.from(b64, "base64"));
+        // await sharp(Buffer.from(b64, "base64")).trim().toFile(filename);
+
         console.log(`Saved page ${canvasPage} of ${totalPages}`);
 
         downloadedImageCount++;
@@ -88,11 +95,7 @@ try {
       }
     });
     await tab.mouse.wheel({ deltaY: 1000 }); // Scroll down to load more canvases
-
-    const start = +new Date();
-    await tab.waitForNetworkIdle();
-    const elapsed = +new Date() - start;
-    if (elapsed < 10) break; // If it took less than 10ms, we assume no new pages were loaded
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for a short time to allow the page to load more canvases
   }
 } finally {
   await browser.disconnect();

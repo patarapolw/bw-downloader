@@ -2,7 +2,6 @@ import fs from "node:fs";
 import { URL } from "node:url";
 
 import puppeteer from "puppeteer-core";
-import sharp from "sharp";
 
 import { remoteDebuggingPort } from "./chrome.mjs";
 
@@ -46,9 +45,11 @@ try {
 
     const filename = `${folderName}/(${pageRange})_of_${pageCount}.png`;
     if (!fs.existsSync(filename)) {
-      await sharp(await tab.screenshot())
-        .trim()
-        .toFile(filename);
+      // Manually resize the viewport to minimize white space
+      await tab.screenshot({ filename, fullPage: true });
+      // await sharp(await tab.screenshot())
+      //   .trim()
+      //   .toFile(filename);
       console.log(`Saved page ${pageRange} of ${pageCount}`);
     }
 
