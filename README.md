@@ -12,6 +12,8 @@ _One book_ at a time. It also may be required to keep the tab active and visible
 
 # Horizontal scroll
 
-Run "node [./puppeteer/chrome.mjs](/puppeteer/chrome.mjs)". It will open a programmable Chrome window. Use that to login to Bookwalker. Open the viewer tab ready.
+Run `node ./chrome-puppet.mjs`. It will open a programmable Chrome window. Use that to login to Bookwalker. Open the viewer tab ready.
 
-Run "node [./puppeteer/simulate-horizontal.mjs](/puppeteer/simulate-horizontal.mjs)" without closing the viewer tab and Chrome.
+Run `node ./chrome-sim.mjs` without closing the viewer tab and Chrome.
+
+Alternatively, provide a URL argument `node ./chrome-sim.mjs <bookwalker-viewer-URL>`

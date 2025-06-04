@@ -2,12 +2,12 @@
 
 import { fileURLToPath } from "node:url";
 
-import { runInPuppeteer } from "./common.mjs";
-import { simulateHorizontal } from "./simulate-horizontal.mjs";
-import { simulateVertical } from "./simulate-vertical.mjs";
+import { runInPuppeteer } from "./puppeteer/common.mjs";
+import { simulateHorizontal } from "./puppeteer/simulate-horizontal.mjs";
+import { simulateVertical } from "./puppeteer/simulate-vertical.mjs";
 
 /**
- * @type {Parameters<typeof import('./common.mjs').runInPuppeteer>[0]}
+ * @type {Parameters<typeof import('./puppeteer/common.mjs').runInPuppeteer>[0]}
  */
 export async function simulate(o) {
   const canvases = await o.tab.$$("canvas.default");

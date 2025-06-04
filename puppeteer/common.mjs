@@ -25,25 +25,33 @@ export async function runInPuppeteer(fn) {
   });
 
   try {
-    const tabs = await browser.pages();
-    const tab = tabs.find((t) => {
-      const { host } = new URL(t.url());
-      return host.endsWith(".bookwalker.jp") && host.startsWith("viewer");
-    });
+    while (true) {
+      const tabs = await browser.pages();
+      const tab = tabs.find((t) => {
+        const tabURL = t.url();
+        if (process.argv[2] === tabURL) return true; // Allow direct URL matching
 
-    if (!tab) {
-      throw new Error("No suitable tab found for BookWalker viewer.");
+        const { host } = new URL(t.url());
+        return host.endsWith(".bookwalker.jp") && host.startsWith("viewer");
+      });
+
+      if (!tab) {
+        console.error("No suitable tab found for BookWalker viewer.");
+        return;
+      }
+
+      const title = await tab.title();
+      const folderName =
+        "out/" +
+        title.replace("【期間限定無料】", "").replace(/[\s/\\?<>:"|*]/g, ""); // Replace invalid characters for folder names
+      if (!fs.existsSync(folderName)) {
+        fs.mkdirSync(folderName, { recursive: true });
+      }
+
+      await fn({ browser, title, folderName, tab });
+
+      // TODO: go to next volume if available
     }
-
-    const title = await tab.title();
-    const folderName =
-      "out/" +
-      title.replace("【期間限定無料】", "").replace(/[\s/\\?<>:"|*]/g, ""); // Replace invalid characters for folder names
-    if (!fs.existsSync(folderName)) {
-      fs.mkdirSync(folderName, { recursive: true });
-    }
-
-    return await fn({ browser, title, folderName, tab });
   } finally {
     await browser.disconnect();
   }
