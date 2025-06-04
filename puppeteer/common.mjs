@@ -15,10 +15,11 @@ export const remoteDebuggingPort = 9222;
  *  tab: import('puppeteer-core').Page
  * }} Context
  *
- * @param {(o: Context) => Promise<boolean>} fn
+ * @param {(o: Context) => Promise<string>} fn
+ * @param {string} [targetURL]
  * @returns
  */
-export async function runInPuppeteer(fn) {
+export async function runInPuppeteer(fn, targetURL = process.argv[2]) {
   const browser = await puppeteer.connect({
     browserURL: `http://localhost:${remoteDebuggingPort}`,
     defaultViewport: null, // Use the default viewport size
@@ -29,7 +30,7 @@ export async function runInPuppeteer(fn) {
       const tabs = await browser.pages();
       const tab = tabs.find((t) => {
         const tabURL = t.url();
-        if (process.argv[2] === tabURL) return true; // Allow direct URL matching
+        if (targetURL === tabURL) return true; // Allow direct URL matching
 
         const { host } = new URL(t.url());
         return host.endsWith(".bookwalker.jp") && host.startsWith("viewer");
@@ -41,6 +42,7 @@ export async function runInPuppeteer(fn) {
       }
 
       const title = await tab.title();
+      console.log(`Processing: ${title}`);
       const folderName =
         "out/" +
         title.replace("【期間限定無料】", "").replace(/[\s/\\?<>:"|*]/g, ""); // Replace invalid characters for folder names
@@ -48,9 +50,13 @@ export async function runInPuppeteer(fn) {
         fs.mkdirSync(folderName, { recursive: true });
       }
 
-      const hasNext = await fn({ browser, title, folderName, tab });
+      // Wait for menu to disappear
+      await tab.waitForSelector("#menu", { visible: true });
+      await tab.waitForSelector("#menu", { visible: false });
 
-      if (!hasNext) {
+      targetURL = await fn({ browser, title, folderName, tab });
+
+      if (!targetURL) {
         console.log("No more volumes to process.");
         break;
       }

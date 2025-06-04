@@ -68,7 +68,7 @@ export async function simulateVertical({ tab, folderName }) {
   }
 
   // TODO: go to next volume if available
-  return false;
+  return "";
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
