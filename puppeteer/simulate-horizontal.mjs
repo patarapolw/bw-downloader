@@ -45,6 +45,9 @@ export async function simulateHorizontal({ tab, folderName }) {
       );
     }
   }
+
+  // TODO: go to next volume if available
+  return false;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

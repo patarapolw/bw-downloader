@@ -15,7 +15,7 @@ export const remoteDebuggingPort = 9222;
  *  tab: import('puppeteer-core').Page
  * }} Context
  *
- * @param {(o: Context) => Promise<void>} fn
+ * @param {(o: Context) => Promise<boolean>} fn
  * @returns
  */
 export async function runInPuppeteer(fn) {
@@ -48,9 +48,12 @@ export async function runInPuppeteer(fn) {
         fs.mkdirSync(folderName, { recursive: true });
       }
 
-      await fn({ browser, title, folderName, tab });
+      const hasNext = await fn({ browser, title, folderName, tab });
 
-      // TODO: go to next volume if available
+      if (!hasNext) {
+        console.log("No more volumes to process.");
+        break;
+      }
     }
   } finally {
     await browser.disconnect();

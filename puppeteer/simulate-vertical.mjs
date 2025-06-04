@@ -66,6 +66,9 @@ export async function simulateVertical({ tab, folderName }) {
     await tab.mouse.wheel({ deltaY: 1000 }); // Scroll down to load more canvases
     await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for a short time to allow the page to load more canvases
   }
+
+  // TODO: go to next volume if available
+  return false;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
