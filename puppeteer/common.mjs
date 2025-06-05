@@ -50,15 +50,32 @@ export async function runInPuppeteer(fn, targetURL = process.argv[2]) {
         fs.mkdirSync(folderName, { recursive: true });
       }
 
-      await tab.$("#menu").then(async (h) => {
-        if (!h) return;
-        await h.evaluate(async (el) => {
-          if (!el || !(el instanceof HTMLElement)) return;
-          while (el.classList.contains("show")) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
-        });
-      });
+      // await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for the page to load
+
+      const pageSlider = await tab.$("#pageSlider.show");
+      if (pageSlider) {
+        // const uiSliderHandle = await pageSlider.$(".ui-slider-handle");
+        // if (uiSliderHandle) {
+        //   const rect = await uiSliderHandle.evaluate((el) => {
+        //     if (!(el instanceof HTMLElement)) return;
+        //     if (el.style.left === "100%") return null; // Already at the rightmost position
+
+        //     const { width, height, left, top } = el.getBoundingClientRect();
+        //     return { width, height, left, top };
+        //   });
+        //   if (rect) {
+        //     await tab.mouse.click(
+        //       rect.left + rect.width - 10, // Click slightly to the right of the handle
+        //       rect.top + rect.height / 2
+        //     ); // Click slightly to the right of the handle
+        //     console.log("Clicked the slider handle to close the page slider.");
+        //   }
+        // }
+
+        await tab.waitForFunction(
+          () => !document.querySelector("#pageSlider.show")
+        );
+      }
 
       targetURL = await fn({ browser, title, folderName, tab });
 
