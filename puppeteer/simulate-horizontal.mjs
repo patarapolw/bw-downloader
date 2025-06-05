@@ -22,6 +22,7 @@ export async function simulateHorizontal({ tab, folderName }) {
     /** @type {`${string}.png`} */
     const filename = `${folderName}/(${pageRange})_of_${pageCount}.png`;
     if (!fs.existsSync(filename)) {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for .loading elements to appear if needed
       await tab.waitForFunction(() => {
         return Array.from(document.querySelectorAll(".loading")).every((el) => {
           const style = window.getComputedStyle(el);

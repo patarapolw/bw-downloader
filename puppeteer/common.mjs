@@ -50,9 +50,15 @@ export async function runInPuppeteer(fn, targetURL = process.argv[2]) {
         fs.mkdirSync(folderName, { recursive: true });
       }
 
-      // Wait for menu to disappear
-      await tab.waitForSelector("#menu", { visible: true });
-      await tab.waitForSelector("#menu", { visible: false });
+      await tab.$("#menu").then(async (h) => {
+        if (!h) return;
+        await h.evaluate(async (el) => {
+          if (!el || !(el instanceof HTMLElement)) return;
+          while (el.classList.contains("show")) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+        });
+      });
 
       targetURL = await fn({ browser, title, folderName, tab });
 
