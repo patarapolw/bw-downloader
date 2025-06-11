@@ -53,7 +53,9 @@ export async function simulateHorizontal({ tab, folderName }) {
   const frame = await iframe.contentFrame();
 
   // Click the "Next Volume" button if it exists
-  const nextVolumeButton = await frame.$(".btn-reading-next a");
+  const nextVolumeButton = await frame.$(
+    [".btn-reading-next a", ".next-book-detail a.bw_btn"].join(", ")
+  );
   if (!nextVolumeButton) {
     console.log("No 'Next Volume' button found.");
     return ""; // No next volume button, no next volume
