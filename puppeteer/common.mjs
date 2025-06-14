@@ -46,9 +46,11 @@ export async function runInPuppeteer(fn, targetURL = process.argv[2]) {
       const folderName =
         "out/" +
         title
+          .replace(/\p{Z}/gu, "")
           .replace("【期間限定無料】", "")
           .replace("【期間限定無料お試し版】", "")
           .replace("【期間限定試し読み増量】", "")
+          .replace("【合本版】", "")
           .replace(/[\s/\\?<>:"|*]/g, ""); // Replace invalid characters for folder names
       if (!fs.existsSync(folderName)) {
         fs.mkdirSync(folderName, { recursive: true });
