@@ -54,7 +54,11 @@ export async function simulateHorizontal({ tab, folderName }) {
 
   // Click the "Next Volume" button if it exists
   const nextVolumeButton = await frame.$(
-    [".btn-reading-next a", ".next-book-detail a.bw_btn"].join(", ")
+    [
+      ".btn-reading-next a",
+      ".next-book-detail a.bw_btn",
+      '.t-c-read-button a[data-ga-category="next_action"]',
+    ].join(", "),
   );
   if (!nextVolumeButton) {
     console.log("No 'Next Volume' button found.");
